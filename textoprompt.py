@@ -316,66 +316,77 @@ Confiança da Avaliação: [Baixa / Média / Alta]
 Justificativa Final:
 (Explicação detalhada baseada nas evidências encontradas ao longo da análise.)
 
-Responda EXCLUSIVAMENTE com JSON válido.
+# FORMATO OBRIGATÓRIO DE SAÍDA
+
+Sua resposta deve ser EXCLUSIVAMENTE um JSON válido.
 
 Não utilize markdown.
 
 Não utilize blocos de código.
 
-Não escreva texto antes ou depois do JSON.
+Não escreva qualquer texto antes ou depois do JSON.
 
-Utilize exatamente a estrutura abaixo:
+Retorne exatamente a seguinte estrutura:
 
 {
 "metadados": {
 "titulo": "",
 "autor": "",
 "classificacao_final": "",
-"confianca": "",
+"confianca_geral": "",
 "data_analise": ""
 },
 
 "resumo_executivo": "",
 
 "avaliacao": {
-"violencia": {
-"nivel": "",
-"justificativa": ""
-},
 
 ```
+"violencia": {
+  "nivel": "",
+  "confianca": "",
+  "justificativa": ""
+},
+
 "sexo_nudez": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "linguagem": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "drogas_alcool_tabaco": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "temas_sensiveis": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "medo_horror_tensao": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "complexidade_cognitiva": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 },
 
 "potencial_educacional": {
   "nivel": "",
+  "confianca": "",
   "justificativa": ""
 }
 ```
@@ -391,12 +402,20 @@ Utilize exatamente a estrutura abaixo:
 }
 ],
 
-"gatilhos": [
-""
-],
+"gatilhos": [],
+
+"subcategorias_detectadas": {
+"violencia": [],
+"sexo_nudez": [],
+"linguagem": [],
+"drogas_alcool_tabaco": [],
+"temas_sensiveis": [],
+"medo_horror_tensao": []
+},
 
 "evidencias": [
 {
+"id": "EV00001",
 "criterio": "",
 "subcategoria": "",
 "trecho": "",
@@ -408,7 +427,8 @@ Utilize exatamente a estrutura abaixo:
 
 "estatisticas": {
 "quantidade_evidencias": 0,
-"quantidade_gatilhos": 0
+"quantidade_gatilhos": 0,
+"quantidade_temas_sensiveis": 0
 },
 
 "recomendacao_pais_educadores": "",
@@ -416,21 +436,55 @@ Utilize exatamente a estrutura abaixo:
 "justificativa_final": ""
 }
 
-Regras:
+REGRAS OBRIGATÓRIAS
 
-1. Sempre preencha todos os campos.
-2. Não invente informações ausentes.
-3. Se não encontrar evidências para um critério, retorne listas vazias ou texto vazio.
-4. Cada evidência deve conter um trecho literal do livro.
-5. O campo "criterio" deve usar apenas:
+1. Retorne apenas JSON.
 
-   * Violência
-   * Sexo e Nudez
-   * Linguagem
-   * Drogas e Álcool
-   * Temas Sensíveis
-   * Medo e Tensão
-   * Complexidade Cognitiva
-6. O JSON deve ser válido para json.loads().
+2. O JSON deve ser compatível com json.loads().
+
+3. Não utilize comentários.
+
+4. Não utilize markdown.
+
+5. Não utilize aspas simples.
+
+6. Cada evidência deve conter um trecho literal encontrado no livro.
+
+7. Não invente páginas, capítulos ou localizações inexistentes.
+
+8. Caso a localização exata não seja identificável, utilize:
+   "localizacao": "Não identificada".
+
+9. Os IDs devem seguir o padrão:
+
+EV00001
+EV00002
+EV00003
+EV00004
+
+10. O campo "criterio" deve utilizar apenas:
+
+* Violência
+* Sexo e Nudez
+* Linguagem
+* Drogas e Álcool
+* Temas Sensíveis
+* Medo e Tensão
+* Complexidade Cognitiva
+
+11. O campo "confianca" deve utilizar apenas:
+
+* Baixa
+* Média
+* Alta
+
+12. O campo "nivel" deve utilizar apenas os valores definidos para cada critério.
+
+13. Caso não existam evidências para um critério, retorne listas vazias.
+
+14. Não resuma nem altere citações extraídas do livro.
+
+15. Utilize o maior número possível de evidências relevantes encontradas na obra.
+
 
 """
