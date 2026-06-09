@@ -315,4 +315,122 @@ Confiança da Avaliação: [Baixa / Média / Alta]
 
 Justificativa Final:
 (Explicação detalhada baseada nas evidências encontradas ao longo da análise.)
+
+Responda EXCLUSIVAMENTE com JSON válido.
+
+Não utilize markdown.
+
+Não utilize blocos de código.
+
+Não escreva texto antes ou depois do JSON.
+
+Utilize exatamente a estrutura abaixo:
+
+{
+"metadados": {
+"titulo": "",
+"autor": "",
+"classificacao_final": "",
+"confianca": "",
+"data_analise": ""
+},
+
+"resumo_executivo": "",
+
+"avaliacao": {
+"violencia": {
+"nivel": "",
+"justificativa": ""
+},
+
+```
+"sexo_nudez": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"linguagem": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"drogas_alcool_tabaco": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"temas_sensiveis": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"medo_horror_tensao": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"complexidade_cognitiva": {
+  "nivel": "",
+  "justificativa": ""
+},
+
+"potencial_educacional": {
+  "nivel": "",
+  "justificativa": ""
+}
+```
+
+},
+
+"temas_sensiveis_detectados": [
+{
+"tema": "",
+"frequencia": "",
+"impacto_emocional": "",
+"descricao": ""
+}
+],
+
+"gatilhos": [
+""
+],
+
+"evidencias": [
+{
+"criterio": "",
+"subcategoria": "",
+"trecho": "",
+"localizacao": "",
+"explicacao": "",
+"impacto": ""
+}
+],
+
+"estatisticas": {
+"quantidade_evidencias": 0,
+"quantidade_gatilhos": 0
+},
+
+"recomendacao_pais_educadores": "",
+
+"justificativa_final": ""
+}
+
+Regras:
+
+1. Sempre preencha todos os campos.
+2. Não invente informações ausentes.
+3. Se não encontrar evidências para um critério, retorne listas vazias ou texto vazio.
+4. Cada evidência deve conter um trecho literal do livro.
+5. O campo "criterio" deve usar apenas:
+
+   * Violência
+   * Sexo e Nudez
+   * Linguagem
+   * Drogas e Álcool
+   * Temas Sensíveis
+   * Medo e Tensão
+   * Complexidade Cognitiva
+6. O JSON deve ser válido para json.loads().
+
 """
