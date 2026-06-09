@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from textoprompt import textobase
 
+import json
 
 # =====================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -201,7 +202,7 @@ def analisar_livro(texto):
 
     inicio = time.perf_counter()
 
-    resposta = client.chat(
+    response = client.chat(
         model="gemma4:31b-cloud",
         messages=[
             {
@@ -218,12 +219,24 @@ def analisar_livro(texto):
 
     fim = time.perf_counter()
 
-    return (
-        resposta["message"]["content"],
-        fim - inicio,
-        resposta
-    )
+    conteudo = response["message"]["content"]
 
+    try:
+        dados_json = json.loads(conteudo)
+
+    except Exception:
+
+        dados_json = {
+            "erro": "Resposta não retornou JSON válido",
+            "resposta_original": conteudo
+        }
+
+    return (
+        dados_json,
+        conteudo,
+        fim - inicio,
+        response
+    )
 
 # =====================================================
 # UPLOAD
@@ -256,9 +269,7 @@ if arquivo:
             "Enviando para o Ollama Cloud..."
         ):
 
-            resultado, tempo, response = analisar_livro(
-                texto
-            )
+            dados_json, resultado_bruto, tempo, response = analisar_livro(texto)
 
         st.success("Análise concluída!")
 
@@ -288,12 +299,28 @@ if arquivo:
         st.divider()
 
         st.markdown("## Resultado")
-
-        st.markdown(resultado)
-
-        st.download_button(
-            "📥 Baixar Resultado",
-            resultado,
-            file_name="classificacao_livro.md",
-            mime="text/markdown"
+        
+        st.json(dados_json)
+        
+        # st.markdown(resultado)
+        
+        st.markdown("## Relatório Completo")
+        st.markdown(
+            f"```json\n{json.dumps(dados_json, ensure_ascii=False, indent=2)}\n```"
         )
+       st.download_button(
+    label="📥 Baixar JSON",
+    data=json.dumps(
+        dados_json,
+        ensure_ascii=False,
+        indent=2
+    ),
+    file_name="analise_livro.json",
+    mime="application/json"
+)
+    st.download_button(
+    label="📥 Baixar Resposta Bruta",
+    data=resultado_bruto,
+    file_name="resposta_bruta.txt",
+    mime="text/plain"
+)
