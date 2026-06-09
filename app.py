@@ -308,19 +308,19 @@ if arquivo:
         st.markdown(
             f"```json\n{json.dumps(dados_json, ensure_ascii=False, indent=2)}\n```"
         )
-       st.download_button(
-    label="📥 Baixar JSON",
-    data=json.dumps(
-        dados_json,
-        ensure_ascii=False,
-        indent=2
-    ),
-    file_name="analise_livro.json",
-    mime="application/json"
-)
-    st.download_button(
-    label="📥 Baixar Resposta Bruta",
-    data=resultado_bruto,
-    file_name="resposta_bruta.txt",
-    mime="text/plain"
-)
+        st.download_button(
+            label="📥 Baixar JSON",
+            data=json.dumps(
+                dados_json,
+                ensure_ascii=False,
+                indent=2
+            ),
+            file_name="analise_livro.json",
+            mime="application/json"
+        )
+        st.download_button(
+            label="📥 Baixar Resposta Bruta",
+            data=resultado_bruto,
+            file_name="resposta_bruta.txt",
+            mime="text/plain"
+        )
