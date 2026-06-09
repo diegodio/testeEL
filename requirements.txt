@@ -1,0 +1,7 @@
+streamlit
+ollama
+pypdf
+ebooklib
+beautifulsoup4
+lxml
+html5lib
