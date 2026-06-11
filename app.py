@@ -175,14 +175,27 @@ def renderizar_relatorio_bonito(dados):
         st.markdown(f"### 🔹 {titulo}")
         
         if isinstance(valor, dict):
-            # Se for um dicionário aninhado (Ex: Avaliação detalhada)
+            # Se for um dicionário aninhado (Ex: Avaliação detalhada ou Subcategorias)
             for subchave, subvalor in valor.items():
+                nome_subchave = str(subchave).replace('_', ' ').title()
+                
                 if isinstance(subvalor, dict):
-                    st.markdown(f"**{str(subchave).replace('_', ' ').title()}**")
+                    # Se o valor dentro do dicionário for outro dicionário
+                    st.markdown(f"**{nome_subchave}**")
                     for k, v in subvalor.items():
                         st.markdown(f"- **{str(k).title()}:** {v}")
+                        
+                elif isinstance(subvalor, list):
+                    # Se o valor for uma lista (Ex: ['Romance', 'Beijos'] ou [])
+                    if len(subvalor) == 0:
+                        st.markdown(f"- **{nome_subchave}:** *Nenhuma*")
+                    else:
+                        itens_formatados = ", ".join([str(item) for item in subvalor])
+                        st.markdown(f"- **{nome_subchave}:** {itens_formatados}")
+                        
                 else:
-                    st.markdown(f"- **{str(subchave).replace('_', ' ').title()}:** {subvalor}")
+                    # Se for apenas um texto direto
+                    st.markdown(f"- **{nome_subchave}:** {subvalor}")
                     
         elif isinstance(valor, list):
             if len(valor) == 0:
