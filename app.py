@@ -13,300 +13,390 @@ from bs4 import BeautifulSoup
 
 from textoprompt import textobase
 
-# =====================================================
+# ─────────────────────────────────────────────
 # CONFIGURAÇÃO DA PÁGINA
-# =====================================================
+# ─────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Leitura Segura — Classificação Indicativa IA",
+    page_title="Leitura Segura — Classificação Indicativa",
     page_icon="📖",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# =====================================================
-# CSS REDESIGN — Dark Editorial
-# =====================================================
+# ─────────────────────────────────────────────
+# CSS — Editorial Light
+# ─────────────────────────────────────────────
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
 
-    /* ── Reset e base ── */
-    html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-        background-color: #0A0F1E;
-        color: #E8EAF0;
-    }
+/* ── Esconde chrome do Streamlit ── */
+#MainMenu                          { visibility: hidden; }
+header[data-testid="stHeader"]     { display: none !important; }
+footer                             { display: none !important; }
+[data-testid="stToolbar"]          { display: none !important; }
+[data-testid="stDecoration"]       { display: none !important; }
+[data-testid="stStatusWidget"]     { display: none !important; }
+.stDeployButton                    { display: none !important; }
+button[title="View fullscreen"]    { display: none !important; }
 
-    .block-container {
-        max-width: 860px;
-        padding-top: 3.5rem;
-        padding-bottom: 5rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-    }
+/* ── Base ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+    background-color: #FAFAF8;
+    color: #1A1A1A;
+}
 
-    /* ── Eyebrow acima do título ── */
-    .eyebrow {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #6366F1;
-        margin-bottom: 0.6rem;
-    }
+.block-container {
+    max-width: 780px;
+    padding-top: 4rem;
+    padding-bottom: 6rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
 
-    /* ── Título principal ── */
-    h1 {
-        font-family: 'Syne', sans-serif !important;
-        font-size: 2.6rem !important;
-        font-weight: 800 !important;
-        line-height: 1.1 !important;
-        color: #F0F2FF !important;
-        letter-spacing: -0.02em;
-        margin-bottom: 0.75rem !important;
-    }
+/* ── Logotipo / topo ── */
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 3rem;
+}
+.app-logo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2D5BE3;
+}
+.app-logo-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2D5BE3;
+}
 
-    /* ── Subtítulo descritivo ── */
-    .subtitulo {
-        font-size: 1rem;
-        color: #8B90A8;
-        line-height: 1.6;
-        max-width: 600px;
-        margin-bottom: 2.5rem;
-    }
+/* ── Título ── */
+h1 {
+    font-family: 'Instrument Serif', serif !important;
+    font-size: 3rem !important;
+    font-weight: 400 !important;
+    line-height: 1.08 !important;
+    color: #1A1A1A !important;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem !important;
+}
 
-    /* ── Separador fino ── */
-    hr {
-        border: none;
-        border-top: 1px solid #1E2A45;
-        margin: 2rem 0;
-    }
+/* ── Subtítulo ── */
+.subtitulo {
+    font-size: 1rem;
+    color: #6B6B6B;
+    line-height: 1.65;
+    max-width: 560px;
+    margin-bottom: 3rem;
+    font-weight: 400;
+}
 
-    /* ── Upload container ── */
-    .upload-wrapper {
-        background: #111827;
-        border: 1.5px dashed #2A3352;
-        border-radius: 16px;
-        padding: 2.5rem 2rem;
-        text-align: center;
-        transition: border-color 0.25s ease;
-        margin-bottom: 1.5rem;
-    }
-    .upload-wrapper:hover {
-        border-color: #6366F1;
-    }
+/* ── Divisor fino ── */
+.divider {
+    border: none;
+    border-top: 1px solid #E8E4DC;
+    margin: 2.5rem 0;
+}
 
-    /* ── Streamlit file uploader ── */
-    [data-testid="stFileUploader"] {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-    }
-    [data-testid="stFileUploader"] label {
-        color: #8B90A8 !important;
-        font-size: 0.9rem;
-    }
+/* ── Zona de upload ── */
+[data-testid="stFileUploader"] {
+    background: #F5F4F0 !important;
+    border: 1.5px dashed #D0CBC0 !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: #2D5BE3 !important;
+    background: #F0F3FD !important;
+}
+[data-testid="stFileUploader"] label {
+    color: #6B6B6B !important;
+    font-size: 0.88rem !important;
+}
+[data-testid="stFileUploader"] small {
+    color: #A0A0A0 !important;
+}
 
-    /* ── Botão principal ── */
-    .stButton > button {
-        background: #6366F1;
-        color: #FFFFFF;
-        border: none;
-        border-radius: 10px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 600;
-        height: 3.2rem;
-        width: 100%;
-        letter-spacing: 0.01em;
-        transition: background 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-    }
-    .stButton > button:hover {
-        background: #4F52D9;
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.35);
-        color: white;
-    }
-    .stButton > button:active {
-        background: #4044C4;
-    }
+/* ── Botão principal ── */
+.stButton > button {
+    background: #1A1A1A;
+    color: #FAFAF8;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    height: 3rem;
+    width: 100%;
+    letter-spacing: 0.02em;
+    transition: background 0.18s ease;
+}
+.stButton > button:hover {
+    background: #2D5BE3;
+    color: #FFFFFF;
+}
+.stButton > button:active {
+    background: #1E45C4;
+}
 
-    /* ── Métricas ── */
-    [data-testid="stMetric"] {
-        background: #111827;
-        border: 1px solid #1E2A45;
-        border-radius: 12px;
-        padding: 1.2rem 1.4rem;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 0.72rem !important;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #5A6080 !important;
-    }
-    [data-testid="stMetricValue"] {
-        font-family: 'Syne', sans-serif !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: #A78BFA !important;
-    }
+/* ── Métricas ── */
+[data-testid="stMetric"] {
+    background: #F5F4F0;
+    border: 1px solid #E8E4DC;
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: #A0A0A0 !important;
+}
+[data-testid="stMetricValue"] {
+    font-family: 'Instrument Serif', serif !important;
+    font-size: 1.8rem !important;
+    font-weight: 400 !important;
+    color: #1A1A1A !important;
+}
 
-    /* ── Abas ── */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background: #111827;
-        border-radius: 10px;
-        padding: 4px;
-        border: 1px solid #1E2A45;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        border-radius: 7px;
-        padding: 0 1.2rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: #5A6080;
-        background: transparent;
-        transition: all 0.2s ease;
-    }
-    .stTabs [aria-selected="true"] {
-        background: #1E2A45 !important;
-        color: #A78BFA !important;
-    }
+/* ── Abas ── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0;
+    background: #F0EFE9;
+    border-radius: 8px;
+    padding: 3px;
+    border: none;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 36px;
+    border-radius: 6px;
+    padding: 0 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #888;
+    background: transparent;
+    transition: all 0.15s ease;
+    border: none;
+}
+.stTabs [aria-selected="true"] {
+    background: #FFFFFF !important;
+    color: #1A1A1A !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
 
-    /* ── Headings no relatório ── */
-    h2 {
-        font-family: 'Syne', sans-serif !important;
-        font-size: 1.4rem !important;
-        font-weight: 700 !important;
-        color: #E8EAF0 !important;
-        letter-spacing: -0.01em;
-        margin-top: 2rem !important;
-        margin-bottom: 1rem !important;
-    }
+/* ── Headings do relatório ── */
+h2 {
+    font-family: 'Instrument Serif', serif !important;
+    font-size: 1.6rem !important;
+    font-weight: 400 !important;
+    color: #1A1A1A !important;
+    letter-spacing: -0.01em;
+    margin-top: 2.5rem !important;
+    margin-bottom: 1.2rem !important;
+}
 
-    h3 {
-        font-family: 'DM Sans', sans-serif !important;
-        font-size: 0.72rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.16em !important;
-        text-transform: uppercase !important;
-        color: #6366F1 !important;
-        margin-top: 2rem !important;
-        margin-bottom: 0.75rem !important;
-        padding-bottom: 0;
-        border-bottom: none !important;
-    }
+h3 {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    color: #A0A0A0 !important;
+    margin-top: 2rem !important;
+    margin-bottom: 0.6rem !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
 
-    /* ── Card de categoria ── */
-    .categoria-card {
-        background: #111827;
-        border: 1px solid #1E2A45;
-        border-radius: 12px;
-        padding: 1.2rem 1.4rem;
-        margin-bottom: 0.75rem;
-        transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .categoria-card:hover {
-        border-color: #2E3A5E;
-        background: #141C2E;
-    }
+/* ── Card de categoria ── */
+.cat-card {
+    background: #FFFFFF;
+    border: 1px solid #E8E4DC;
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 0.6rem;
+}
+.cat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px solid #F0EFE9;
+    font-size: 0.85rem;
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-label { color: #6B6B6B; }
+.cat-value { color: #1A1A1A; font-weight: 500; }
 
-    /* ── Badge de nível (semáforo) ── */
-    .badge {
-        display: inline-block;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding: 3px 10px;
-        border-radius: 999px;
-        margin-left: 8px;
-        vertical-align: middle;
-    }
-    .badge-alto    { background: rgba(239,68,68,0.15);  color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
-    .badge-medio   { background: rgba(234,179,8,0.15);  color: #FBBF24; border: 1px solid rgba(234,179,8,0.25); }
-    .badge-baixo   { background: rgba(34,197,94,0.15);  color: #4ADE80; border: 1px solid rgba(34,197,94,0.25); }
-    .badge-neutro  { background: rgba(99,102,241,0.12); color: #A78BFA; border: 1px solid rgba(99,102,241,0.2); }
+/* ── Badge nível ── */
+.badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+.badge-alto   { background: #FEE2E2; color: #B91C1C; }
+.badge-medio  { background: #FEF9C3; color: #92400E; }
+.badge-baixo  { background: #DCFCE7; color: #15803D; }
+.badge-neutro { background: #EEF2FF; color: #3730A3; }
 
-    /* ── Evidência box ── */
-    .evidencia-box {
-        background: #0D1424;
-        border-left: 3px solid #6366F1;
-        border-radius: 0 10px 10px 0;
-        padding: 1rem 1.2rem;
-        margin-bottom: 0.75rem;
-        font-size: 0.88rem;
-        color: #9BA3C2;
-        line-height: 1.6;
-        transition: border-color 0.2s ease;
-    }
-    .evidencia-box:hover {
-        border-left-color: #A78BFA;
-        color: #C4C9E0;
-    }
-    .evidencia-box strong {
-        color: #7C82C8;
-        font-weight: 600;
-    }
+/* ── Selo de classificação etária (assinatura do design) ── */
+.selo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid #E8E4DC;
+    border-radius: 12px;
+    padding: 1.4rem 1.8rem;
+    margin-bottom: 2rem;
+}
+.selo-circulo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 3px solid currentColor;
+}
+.selo-circulo span:first-child {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    line-height: 1;
+}
+.selo-circulo span:last-child {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 1px;
+}
+.selo-livre   { color: #15803D; }
+.selo-10      { color: #1D4ED8; }
+.selo-12      { color: #0E7490; }
+.selo-14      { color: #92400E; }
+.selo-16      { color: #C2410C; }
+.selo-18      { color: #B91C1C; }
+.selo-info { }
+.selo-info p { margin: 0; }
+.selo-info .selo-titulo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.1rem;
+    color: #1A1A1A;
+}
+.selo-info .selo-sub {
+    font-size: 0.82rem;
+    color: #6B6B6B;
+    margin-top: 4px;
+    line-height: 1.4;
+}
 
-    /* ── Success / info ── */
-    [data-testid="stAlert"] {
-        background: #111827 !important;
-        border: 1px solid #1E2A45 !important;
-        border-radius: 10px !important;
-        color: #8B90A8 !important;
-    }
+/* ── Evidência ── */
+.evidencia-box {
+    border-top: 1px solid #E8E4DC;
+    padding: 1rem 0;
+    font-size: 0.85rem;
+    color: #6B6B6B;
+    line-height: 1.6;
+}
+.evidencia-box:first-child { border-top: none; }
+.evidencia-box strong { color: #1A1A1A; font-weight: 500; }
 
-    /* ── Download buttons ── */
-    [data-testid="stDownloadButton"] button {
-        background: #111827 !important;
-        border: 1px solid #2A3352 !important;
-        color: #A78BFA !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-    }
-    [data-testid="stDownloadButton"] button:hover {
-        background: #1E2A45 !important;
-        border-color: #6366F1 !important;
-        color: #C4C6FF !important;
-    }
+/* ── Alert / info ── */
+[data-testid="stAlert"] {
+    background: #F5F4F0 !important;
+    border: 1px solid #E8E4DC !important;
+    border-radius: 8px !important;
+    color: #6B6B6B !important;
+    font-size: 0.85rem !important;
+}
 
-    /* ── Status box ── */
-    [data-testid="stStatusWidget"] {
-        background: #111827 !important;
-        border: 1px solid #1E2A45 !important;
-        border-radius: 12px !important;
-    }
+/* ── Download ── */
+[data-testid="stDownloadButton"] button {
+    background: #FFFFFF !important;
+    border: 1px solid #E8E4DC !important;
+    color: #1A1A1A !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    transition: border-color 0.15s ease, background 0.15s ease !important;
+}
+[data-testid="stDownloadButton"] button:hover {
+    border-color: #2D5BE3 !important;
+    color: #2D5BE3 !important;
+    background: #F0F3FD !important;
+}
 
-    /* ── JSON viewer ── */
-    [data-testid="stJson"] {
-        background: #0D1424 !important;
-        border-radius: 12px !important;
-        border: 1px solid #1E2A45 !important;
-    }
+/* ── Status box ── */
+[data-testid="stStatusContainer"] {
+    background: #F5F4F0 !important;
+    border: 1px solid #E8E4DC !important;
+    border-radius: 10px !important;
+}
 
-    /* ── Divider ── */
-    [data-testid="stDivider"] hr {
-        border-color: #1E2A45 !important;
-    }
+/* ── JSON viewer ── */
+[data-testid="stJson"] {
+    background: #F5F4F0 !important;
+    border: 1px solid #E8E4DC !important;
+    border-radius: 10px !important;
+    font-size: 0.8rem !important;
+}
 
-    /* ── Scrollbar personalizada ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0A0F1E; }
-    ::-webkit-scrollbar-thumb { background: #2A3352; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+/* ── Divider nativo ── */
+[data-testid="stDivider"] hr {
+    border-color: #E8E4DC !important;
+}
+
+/* ── Sucesso de upload ── */
+.upload-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.84rem;
+    color: #15803D;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+.upload-ok-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #15803D;
+    flex-shrink: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #FAFAF8; }
+::-webkit-scrollbar-thumb { background: #D0CBC0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2D5BE3; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# =====================================================
-# DICIONÁRIO DE CORREÇÃO ORTOGRÁFICA
-# =====================================================
+# ─────────────────────────────────────────────
+# DICIONÁRIO DE ACENTUAÇÃO
+# ─────────────────────────────────────────────
 
 TERMOS_PTBR = {
     "metadados": "Metadados",
@@ -345,15 +435,19 @@ TERMOS_PTBR = {
     "trecho": "Trecho Original",
     "id": "Identificação",
     "nivel": "Nível",
-    "confianca": "Confiança da IA"
+    "confianca": "Confiança da IA",
 }
 
 def corrigir_texto(texto):
-    texto_limpo = str(texto).replace('_', ' ').strip().lower()
-    return TERMOS_PTBR.get(texto_limpo, str(texto).replace('_', ' ').title())
+    limpo = str(texto).replace("_", " ").strip().lower()
+    return TERMOS_PTBR.get(limpo, str(texto).replace("_", " ").title())
+
+
+# ─────────────────────────────────────────────
+# HELPERS VISUAIS
+# ─────────────────────────────────────────────
 
 def badge_nivel(valor_str):
-    """Retorna HTML de badge colorido baseado no nível detectado."""
     v = str(valor_str).lower()
     if any(x in v for x in ["alto", "forte", "intenso", "explícito", "explicito", "grave", "severo"]):
         return f'<span class="badge badge-alto">{valor_str}</span>'
@@ -361,26 +455,59 @@ def badge_nivel(valor_str):
         return f'<span class="badge badge-medio">{valor_str}</span>'
     elif any(x in v for x in ["baixo", "leve", "mínimo", "minimo", "ausente", "nenhum", "nenhuma"]):
         return f'<span class="badge badge-baixo">{valor_str}</span>'
+    return f'<span class="badge badge-neutro">{valor_str}</span>'
+
+def selo_classificacao(classificacao_str):
+    """Renderiza o selo circular de classificação indicativa."""
+    c = str(classificacao_str).strip()
+    c_low = c.lower()
+
+    if "livre" in c_low:
+        cls, numero, label = "selo-livre", "L", "Livre"
+    elif "18" in c:
+        cls, numero, label = "selo-18", "18", "anos"
+    elif "16" in c:
+        cls, numero, label = "selo-16", "16", "anos"
+    elif "14" in c:
+        cls, numero, label = "selo-14", "14", "anos"
+    elif "12" in c:
+        cls, numero, label = "selo-12", "12", "anos"
+    elif "10" in c:
+        cls, numero, label = "selo-10", "10", "anos"
     else:
-        return f'<span class="badge badge-neutro">{valor_str}</span>'
+        cls, numero, label = "selo-neutro", "?", c
+
+    return f"""
+    <div class="selo-circulo {cls}">
+        <span>{numero}</span>
+        <span>{label}</span>
+    </div>
+    """
 
 
-# =====================================================
+# ─────────────────────────────────────────────
 # CABEÇALHO
-# =====================================================
+# ─────────────────────────────────────────────
 
-st.markdown('<p class="eyebrow">Ferramenta de Análise Editorial</p>', unsafe_allow_html=True)
-st.title("Classificação Indicativa IA")
+st.markdown("""
+<div class="app-logo">
+    <div class="app-logo-dot"></div>
+    <span class="app-logo-text">Leitura Segura</span>
+</div>
+""", unsafe_allow_html=True)
+
+st.title("Classificação\nIndicativa IA")
 st.markdown(
-    '<p class="subtitulo">Envie um livro em PDF ou EPUB e receba em minutos um relatório completo '
-    'de classificação etária, gatilhos emocionais, nível de violência e temas sensíveis — '
-    'gerado por inteligência artificial.</p>',
+    '<p class="subtitulo">Envie um livro em PDF ou EPUB. '
+    'A IA lê o conteúdo completo e devolve um relatório detalhado '
+    'de classificação etária, gatilhos emocionais e temas sensíveis.</p>',
     unsafe_allow_html=True
 )
 
-# =====================================================
-# FUNÇÕES DE EXTRAÇÃO
-# =====================================================
+
+# ─────────────────────────────────────────────
+# EXTRAÇÃO DE TEXTO
+# ─────────────────────────────────────────────
 
 def ler_pdf(caminho):
     reader = PdfReader(caminho)
@@ -394,7 +521,8 @@ def ler_pdf(caminho):
 def ler_epub(caminho):
     book = epub.read_epub(caminho)
     texto = ""
-    documentos = [item for item in book.get_items() if item.get_type() == ebooklib.ITEM_DOCUMENT]
+    documentos = [item for item in book.get_items()
+                  if item.get_type() == ebooklib.ITEM_DOCUMENT]
     for item in documentos:
         soup = BeautifulSoup(item.get_content(), "html.parser")
         texto += soup.get_text(separator=" ", strip=True) + "\n\n"
@@ -405,13 +533,16 @@ def extrair_texto(upload):
     with tempfile.NamedTemporaryFile(delete=False, suffix=extensao) as tmp:
         tmp.write(upload.getvalue())
         caminho = tmp.name
-    if extensao == ".pdf": return ler_pdf(caminho)
-    elif extensao == ".epub": return ler_epub(caminho)
-    raise ValueError("Formato não suportado")
+    if extensao == ".pdf":
+        return ler_pdf(caminho)
+    elif extensao == ".epub":
+        return ler_epub(caminho)
+    raise ValueError("Formato não suportado.")
 
-# =====================================================
-# OLLAMA CLOUD
-# =====================================================
+
+# ─────────────────────────────────────────────
+# ANÁLISE VIA OLLAMA
+# ─────────────────────────────────────────────
 
 def analisar_livro(texto):
     prompt = f"{textobase}\n\n{texto}"
@@ -430,138 +561,166 @@ def analisar_livro(texto):
     try:
         dados_json = json.loads(conteudo)
     except Exception:
-        dados_json = {"erro": "A resposta da IA não retornou um JSON válido.", "resposta_original": conteudo}
+        dados_json = {
+            "erro": "A resposta da IA não retornou um JSON válido.",
+            "resposta_original": conteudo,
+        }
     return dados_json, conteudo, fim - inicio, response
 
-# =====================================================
-# FORMATADOR VISUAL DO RELATÓRIO
-# =====================================================
 
-def renderizar_relatorio_bonito(dados):
+# ─────────────────────────────────────────────
+# RENDERIZADOR DO RELATÓRIO
+# ─────────────────────────────────────────────
+
+def renderizar_relatorio(dados):
     if not isinstance(dados, dict):
         st.write(dados)
         return
 
+    # Tenta extrair e renderizar o selo de classificação no topo
+    classificacao = None
+    justificativa = None
+    for k, v in dados.items():
+        k_clean = str(k).replace("_", " ").strip().lower()
+        if "classificacao final" in k_clean or "classificacao" in k_clean:
+            if isinstance(v, str):
+                classificacao = v
+            elif isinstance(v, dict):
+                for sk, sv in v.items():
+                    classificacao = str(sv)
+                    break
+        if "justificativa" in k_clean:
+            justificativa = str(v)
+
+    if classificacao:
+        circulo_html = selo_classificacao(classificacao)
+        just_html = f'<p class="selo-sub">{justificativa}</p>' if justificativa else ""
+        st.markdown(f"""
+        <div class="selo-wrapper">
+            {circulo_html}
+            <div class="selo-info">
+                <p class="selo-titulo">{classificacao}</p>
+                {just_html}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Renderiza o restante
     for chave, valor in dados.items():
-        titulo_formatado = corrigir_texto(chave)
-        st.markdown(f"### {titulo_formatado}")
+        k_clean = str(chave).replace("_", " ").strip().lower()
+        # Pula o que já foi exibido no selo
+        if "classificacao" in k_clean or "justificativa" in k_clean:
+            continue
+
+        titulo = corrigir_texto(chave)
+        st.markdown(f"### {titulo}")
 
         if isinstance(valor, dict):
-            st.markdown('<div class="categoria-card">', unsafe_allow_html=True)
-            for subchave, subvalor in valor.items():
-                nome_subchave = corrigir_texto(subchave)
-                if isinstance(subvalor, dict):
-                    st.markdown(f"**{nome_subchave}**")
-                    for k, v in subvalor.items():
-                        st.markdown(f"<span style='color:#5A6080;font-size:0.85rem;'>— <b style='color:#9BA3C2'>{corrigir_texto(k)}:</b> {v}</span>", unsafe_allow_html=True)
-                elif isinstance(subvalor, list):
-                    if len(subvalor) == 0:
-                        st.markdown(f"<span style='color:#5A6080;font-size:0.85rem;'>— <b style='color:#9BA3C2'>{nome_subchave}:</b> <i>Nenhuma</i></span>", unsafe_allow_html=True)
-                    else:
-                        itens = ", ".join([str(item) for item in subvalor])
-                        st.markdown(f"<span style='color:#5A6080;font-size:0.85rem;'>— <b style='color:#9BA3C2'>{nome_subchave}:</b> {itens}</span>", unsafe_allow_html=True)
+            linhas_html = ""
+            for sk, sv in valor.items():
+                sk_clean = str(sk).replace("_", " ").strip().lower()
+                nome = corrigir_texto(sk)
+                if isinstance(sv, list):
+                    sv_str = ", ".join(str(i) for i in sv) if sv else "—"
+                    linhas_html += f'<div class="cat-row"><span class="cat-label">{nome}</span><span class="cat-value">{sv_str}</span></div>'
+                elif isinstance(sv, dict):
+                    # sub-dicionário: exibe com recuo simples
+                    linhas_html += f'<div class="cat-row"><span class="cat-label">{nome}</span><span class="cat-value">↓</span></div>'
+                    for sk2, sv2 in sv.items():
+                        linhas_html += f'<div class="cat-row" style="padding-left:1rem"><span class="cat-label" style="color:#A0A0A0">{corrigir_texto(sk2)}</span><span class="cat-value">{sv2}</span></div>'
                 else:
-                    # Chave "nivel" recebe badge colorido
-                    chave_limpa = str(subchave).replace('_', ' ').strip().lower()
-                    if chave_limpa == "nivel":
-                        st.markdown(
-                            f"<span style='color:#5A6080;font-size:0.85rem;'>— <b style='color:#9BA3C2'>{nome_subchave}:</b> {badge_nivel(subvalor)}</span>",
-                            unsafe_allow_html=True
-                        )
+                    if sk_clean == "nivel":
+                        linhas_html += f'<div class="cat-row"><span class="cat-label">{nome}</span><span class="cat-value">{badge_nivel(sv)}</span></div>'
                     else:
-                        st.markdown(f"<span style='color:#5A6080;font-size:0.85rem;'>— <b style='color:#9BA3C2'>{nome_subchave}:</b> {subvalor}</span>", unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+                        linhas_html += f'<div class="cat-row"><span class="cat-label">{nome}</span><span class="cat-value">{sv}</span></div>'
+            st.markdown(f'<div class="cat-card">{linhas_html}</div>', unsafe_allow_html=True)
 
         elif isinstance(valor, list):
-            if len(valor) == 0:
-                st.markdown("<span style='color:#3A4060;font-size:0.85rem;font-style:italic;'>Nenhum item detectado nesta categoria.</span>", unsafe_allow_html=True)
+            if not valor:
+                st.markdown('<p style="color:#A0A0A0;font-size:0.85rem;">Nenhum item detectado.</p>', unsafe_allow_html=True)
             elif isinstance(valor[0], dict):
+                blocos = ""
                 for item in valor:
                     linhas = ""
-                    for k, v in item.items():
-                        linhas += f"<strong>{corrigir_texto(k)}:</strong> {v}<br>"
-                    st.markdown(f'<div class="evidencia-box">{linhas}</div>', unsafe_allow_html=True)
+                    for k2, v2 in item.items():
+                        linhas += f"<strong>{corrigir_texto(k2)}:</strong> {v2}<br>"
+                    blocos += f'<div class="evidencia-box">{linhas}</div>'
+                st.markdown(blocos, unsafe_allow_html=True)
             else:
-                for item in valor:
-                    st.markdown(f"<span style='color:#9BA3C2;font-size:0.88rem;'>· {item}</span>", unsafe_allow_html=True)
+                items_html = "".join(
+                    f'<li style="color:#6B6B6B;font-size:0.85rem;margin-bottom:4px">{i}</li>'
+                    for i in valor
+                )
+                st.markdown(f'<ul style="padding-left:1.2rem;margin:0">{items_html}</ul>', unsafe_allow_html=True)
+
         else:
-            st.markdown(f"<span style='color:#C4C9E0;'>{valor}</span>", unsafe_allow_html=True)
+            st.markdown(f'<p style="color:#1A1A1A;font-size:0.9rem;line-height:1.6">{valor}</p>', unsafe_allow_html=True)
 
         st.write("")
 
 
-# =====================================================
-# INTERFACE PRINCIPAL
-# =====================================================
+# ─────────────────────────────────────────────
+# INTERFACE
+# ─────────────────────────────────────────────
 
-with st.container(border=False):
-    st.markdown('<div class="upload-wrapper">', unsafe_allow_html=True)
-    arquivo = st.file_uploader(
-        "Arraste seu PDF ou EPUB aqui, ou clique para selecionar",
-        type=["pdf", "epub"],
-        help="Processamento seguro e privativo. O arquivo não é armazenado.",
-        label_visibility="visible"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+arquivo = st.file_uploader(
+    "Selecione um arquivo PDF ou EPUB",
+    type=["pdf", "epub"],
+    help="Processamento seguro. O arquivo não é armazenado.",
+    label_visibility="collapsed"
+)
 
 if arquivo:
     st.markdown(
-        f"<span style='color:#4ADE80;font-size:0.85rem;font-weight:600;'>✓ {arquivo.name} carregado</span>",
+        f'<div class="upload-ok"><div class="upload-ok-dot"></div>{arquivo.name}</div>',
         unsafe_allow_html=True
     )
-    st.write("")
 
-    if st.button("Analisar livro →"):
-
-        with st.status("Processando documento...", expanded=True) as status:
-            st.write("Extraindo texto do arquivo...")
+    if st.button("Analisar livro"):
+        with st.status("Lendo documento…", expanded=True) as status:
+            st.write("Extraindo texto…")
             texto = extrair_texto(arquivo)
-            st.write(f"✓ {len(texto):,} caracteres extraídos.".replace(',', '.'))
-            st.write("Enviando ao modelo de linguagem para análise profunda...")
+            chars = f"{len(texto):,}".replace(",", ".")
+            st.write(f"{chars} caracteres extraídos.")
+            st.write("Analisando com IA…")
             dados_json, resultado_bruto, tempo, response = analisar_livro(texto)
-            status.update(label="Análise concluída.", state="complete", expanded=False)
+            status.update(label="Pronto.", state="complete", expanded=False)
 
         st.write("")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Caracteres", f"{len(texto):,}".replace(',', '.'))
+        col1.metric("Caracteres", f"{len(texto):,}".replace(",", "."))
         col2.metric("Tempo", f"{tempo:.1f}s")
         if "eval_count" in response:
-            col3.metric("Tokens", f"{response['eval_count']:,}".replace(',', '.'))
+            col3.metric("Tokens", f"{response['eval_count']:,}".replace(",", "."))
 
         st.divider()
 
-        aba_relatorio, aba_dados, aba_downloads = st.tabs([
-            "Relatório",
-            "JSON técnico",
-            "Exportar"
-        ])
+        aba1, aba2, aba3 = st.tabs(["Relatório", "JSON", "Exportar"])
 
-        with aba_relatorio:
-            st.markdown("## Resultado da Análise")
-            renderizar_relatorio_bonito(dados_json)
+        with aba1:
+            renderizar_relatorio(dados_json)
 
-        with aba_dados:
-            st.info("Retorno estruturado da IA — útil para auditoria e integrações.")
+        with aba2:
+            st.info("Retorno bruto estruturado — útil para auditoria e integrações de sistema.")
             st.json(dados_json)
 
-        with aba_downloads:
-            st.markdown("## Exportar relatório")
-            st.markdown("<span style='color:#5A6080;font-size:0.9rem;'>Salve os resultados para uso externo ou integração com outros sistemas.</span>", unsafe_allow_html=True)
+        with aba3:
+            st.markdown("#### Exportar resultados")
             st.write("")
-            col_dl1, col_dl2 = st.columns(2)
-            with col_dl1:
+            c1, c2 = st.columns(2)
+            with c1:
                 st.download_button(
-                    label="Baixar JSON",
+                    "Baixar JSON",
                     data=json.dumps(dados_json, ensure_ascii=False, indent=2),
-                    file_name="classificacao_livro.json",
+                    file_name="classificacao.json",
                     mime="application/json",
-                    use_container_width=True
+                    use_container_width=True,
                 )
-            with col_dl2:
+            with c2:
                 st.download_button(
-                    label="Baixar TXT bruto",
+                    "Baixar TXT",
                     data=resultado_bruto,
                     file_name="analise_bruta.txt",
                     mime="text/plain",
-                    use_container_width=True
+                    use_container_width=True,
                 )
